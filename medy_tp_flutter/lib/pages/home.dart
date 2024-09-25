@@ -65,6 +65,63 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void showSurpriseGif() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Image.asset(
+            'assets/water-cooling.gif',
+            scale: 0.5,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Fermer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showGojoGif() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Extension du territoire !',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.pink,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/gojo-satoru.gif',
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Fermer'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,89 +137,125 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.blue,
         child: const Icon(Icons.add),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firebaseService.getCodes(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-                child: Text('Erreur: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red)));
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-                child:
-                    Text('Aucun code trouvé', style: TextStyle(fontSize: 18)));
-          }
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              DocumentSnapshot document = snapshot.data!.docs[index];
-              Map<String, dynamic> data =
-                  document.data()! as Map<String, dynamic>;
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: ListTile(
-                  title: Text(
-                    data['code'] ?? 'Code inconnu',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => openDialogCode(
-                            existingCode: data['code'],
-                            documentId: document.id),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: Stack(
+        children: [
+          StreamBuilder<QuerySnapshot>(
+            stream: _firebaseService.getCodes(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                    child: Text('Erreur: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red)));
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                    child: Text('Aucun code trouvé',
+                        style: TextStyle(fontSize: 18)));
+              }
+
+              return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot document = snapshot.data!.docs[index];
+                  Map<String, dynamic> data =
+                      document.data()! as Map<String, dynamic>;
+                  return Card(
+                    elevation: 2,
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                    child: ListTile(
+                      title: Text(
+                        data['code'] ?? 'Code inconnu',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Courier',
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Confirmer la suppression"),
-                                content: const Text(
-                                    "Êtes-vous sûr de vouloir supprimer ce code ?"),
-                                actions: [
-                                  TextButton(
-                                    child: const Text(
-                                      "Annuler",
-                                      style: TextStyle(color: Colors.blue),
-                                    ),
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      _firebaseService.deleteCode(document.id);
-                                      Navigator.of(context).pop();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red),
-                                    child: const Text(
-                                      "Supprimer",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                ],
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => openDialogCode(
+                                existingCode: data['code'],
+                                documentId: document.id),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title:
+                                        const Text("Confirmer la suppression"),
+                                    content: const Text(
+                                        "Êtes-vous sûr de vouloir supprimer ce code ?"),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text(
+                                          "Annuler",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _firebaseService
+                                              .deleteCode(document.id);
+                                          Navigator.of(context).pop();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red),
+                                        child: const Text(
+                                          "Supprimer",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+          Positioned(
+            left: 16,
+            bottom: 16,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FloatingActionButton(
+                  onPressed: showGojoGif,
+                  tooltip: 'Gojo Satoru',
+                  backgroundColor: Colors.indigo,
+                  child: const Icon(Icons.auto_awesome),
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton(
+                  onPressed: showSurpriseGif,
+                  tooltip: 'Surprise !',
+                  backgroundColor: Colors.purple,
+                  child: const Icon(Icons.emoji_emotions),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
